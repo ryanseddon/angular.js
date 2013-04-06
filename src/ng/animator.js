@@ -224,7 +224,7 @@ var $AnimatorProvider = function() {
           return function(element, parent, after) {
             beforeFn(element, parent, after);
             afterFn(element, parent, after);
-          }
+          };
         } else {
           var setupClass = className + '-setup';
           var startClass = className + '-start';
@@ -250,23 +250,21 @@ var $AnimatorProvider = function() {
               element.addClass(startClass);
               if (polyfillStart) {
                 polyfillStart(element, done, memento);
-              } else if (isFunction($window.getComputedStyle)) {
+              } else if ($sniffer.supportsTransitions) {
                 var vendorTransitionProp = $sniffer.vendorPrefix + 'Transition';
-                var w3cTransitionProp = 'transition'; //one day all browsers will have this
+                var transEndEventNames = {
+                  'WebkitTransition' : 'webkitTransitionEnd',
+                  'MozTransition'    : 'transitionend',
+                  'OTransition'      : 'oTransitionEnd',
+                  'msTransition'     : 'MSTransitionEnd',
+                  'transition'       : 'transitionend'
+                };
+                var vendorTransitionEndEvent = transEndEventNames[vendorTransitionProp];
 
-                var durationKey = 'Duration';
-                var duration = 0;
-                //we want all the styles defined before and after
-                forEach(element, function(element) {
-                  var globalStyles = $window.getComputedStyle(element) || {};
-                  duration = Math.max(
-                      parseFloat(globalStyles[w3cTransitionProp    + durationKey]) ||
-                      parseFloat(globalStyles[vendorTransitionProp + durationKey]) ||
-                      0,
-                      duration);
+                element.bind(vendorTransitionEndEvent, function() {
+                  element.unbind(vendorTransitionEndEvent);
+                  done();
                 });
-
-                $window.setTimeout(done, duration * 1000);
               } else {
                 done();
               }
@@ -277,10 +275,10 @@ var $AnimatorProvider = function() {
               element.removeClass(setupClass);
               element.removeClass(startClass);
             }
-          }
+          };
         }
       }
-    }
+    };
 
     function show(element) {
       element.css('display', '');

@@ -247,6 +247,7 @@ var $AnimatorProvider = function() {
             $window.setTimeout(beginAnimation, 1);
 
             function beginAnimation() {
+              console.log('beginAnimation');
               element.addClass(startClass);
               if (polyfillStart) {
                 polyfillStart(element, done, memento);
@@ -260,8 +261,9 @@ var $AnimatorProvider = function() {
                   'transition'       : 'transitionend'
                 };
                 var vendorTransitionEndEvent = transEndEventNames[vendorTransitionProp];
-
+                console.log(element.outterHTML)
                 element.bind(vendorTransitionEndEvent, function() {
+                  console.log('transitionend')
                   element.unbind(vendorTransitionEndEvent);
                   done();
                 });

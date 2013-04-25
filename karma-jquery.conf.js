@@ -6,7 +6,7 @@ exclude = ['**/*jasmine*/**', '**/*jstd*/**'].concat(angularFiles.files.jstdJque
 autoWatch = true;
 logLevel = LOG_INFO;
 logColors = true;
-browsers = ['Chrome'];
+browsers = ['Safari'];
 
 junitReporter = {
   outputFile: 'test_out/jquery.xml',

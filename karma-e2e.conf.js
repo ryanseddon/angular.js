@@ -6,7 +6,7 @@ autoWatch = false;
 singleRun = true;
 logLevel = LOG_INFO;
 logColors = true;
-browsers = ['Chrome'];
+browsers = ['Safari'];
 
 proxies = {
   // angular.js, angular-resource.js, etc

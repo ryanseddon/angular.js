@@ -486,11 +486,17 @@ describe('ngView', function() {
 });
 
 describe('ngAnimate', function() {
-  var element, window;
+  var element, window, triggerTransitionEnd;
 
   beforeEach(module(function($provide, $routeProvider) {
     $provide.value('$window', window = angular.mock.createMockWindow());
     $routeProvider.when('/foo', {controller: noop, templateUrl: '/foo.html'});
+
+    spyOn(angular.element, 'bind').andCallFake(function(element, handler) {
+      // Store the handler to be used to simulate the end of the transition later
+      triggerTransitionEnd = handler;
+    });
+
     return function($templateCache) {
       $templateCache.put('/foo.html', [200, '<div>data</div>', {}]);
     }
@@ -500,7 +506,7 @@ describe('ngAnimate', function() {
     dealoc(element);
   });
 
-  it('should fire off the enter animation + add and remove the css classes',
+  iit('should fire off the enter animation + add and remove the css classes',
       inject(function($compile, $rootScope, $sniffer, $location, $templateCache) {
         element = $compile('<div ng-view ng-animate="{enter: \'custom-enter\'}"></div>')($rootScope);
 
@@ -509,6 +515,13 @@ describe('ngAnimate', function() {
 
         //if we add the custom css stuff here then it will get picked up before the animation takes place
         var child = jqLite(element.children()[0]);
+        spyOn(child, 'bind').andCallFake(function(element, handler) {
+          // Store the handler to be used to simulate the end of the transition later
+          console.log(handler);
+          triggerTransitionEnd = handler;
+        });
+        // Mock up the element.unbind method
+        spyOn(child, 'unbind');
         var cssProp = '-' + $sniffer.vendorPrefix + '-transition';
         var cssValue = '1s linear all';
         child.css(cssProp, cssValue);
@@ -517,11 +530,15 @@ describe('ngAnimate', function() {
           expect(child.attr('class')).toContain('custom-enter-setup');
           window.setTimeout.expect(1).process();
 
+          expect(child.bind).toHaveBeenCalled();
+
           expect(child.attr('class')).toContain('custom-enter-start');
-          window.setTimeout.expect(1000).process();
+          //window.setTimeout.expect(1000).process();
         } else {
           expect(window.setTimeout.queue).toEqual([]);
         }
+
+        // triggerTransitionEnd();
 
         expect(child.attr('class')).not.toContain('custom-enter-setup');
         expect(child.attr('class')).not.toContain('custom-enter-start');
